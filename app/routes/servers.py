@@ -18,8 +18,20 @@ def register(payload: RegisterServerRequest) -> RegisterServerResponse:
 
 
 @router.get("/get_registered_servers", response_model=list[RegisteredServer])
-def get_registered_servers() -> list[RegisteredServer]:
-    return ServerService.get_registered_servers()
+def get_registered_servers(query: str | None = None) -> list[RegisteredServer]:
+    servers = ServerService.get_registered_servers()
+
+    if not query or not query.strip():
+        return servers
+
+    q = query.strip().lower()
+    return [
+        server
+        for server in servers
+        if q in server.service_id.lower()
+        or q in server.ip.lower()
+        or q in server.api_url.lower()
+    ]
 
 
 @router.post("/unregister", response_model=UnregisterServerResponse)
